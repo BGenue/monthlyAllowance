@@ -20,7 +20,7 @@ import com.google.android.gms.ads.initialization.OnInitializationCompleteListene
 
 public class MainActivity extends AppCompatActivity
 {
-	static final private String TAG = "main";
+	static final private String TAG = "myMain";
 	//광고
 	private AdView mAdView;
 	private FrameLayout mAdLayout;
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity
 		}
 	}
 
-	public void onClickMenuButton(View v)
+	public void onMenuClicked(View v)
 	{
 		switch(v.getId())
 		{
