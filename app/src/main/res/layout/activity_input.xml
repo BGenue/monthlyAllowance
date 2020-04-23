@@ -58,43 +58,19 @@
             android:layout_weight="1"
             android:onClick="onRadioClicked"/>
     </RadioGroup>
-    <TextView
+    <Button
         android:id="@+id/input_date_text"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:text="2020.4.20 (월)"
         android:autoSizeTextType="uniform"
+        android:onClick="inputOnClick"
         app:layout_constraintTop_toBottomOf="@+id/input_radio_group"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/input_category_text"
         app:layout_constraintHeight_default="percent"
         app:layout_constraintHeight_percent="0.09"/>
-    <FrameLayout
-        android:id="@+id/input_category_text"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#31FF0000"
-        app:layout_constraintTop_toBottomOf="@+id/input_date_text"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/input_amount_text"
-        app:layout_constraintHeight_default="percent"
-        app:layout_constraintHeight_percent="0.09">
-        <EditText
-            android:id="@+id/empty"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:inputType="text"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="카테고리"/>
-        <Spinner
-            android:id="@+id/test_spinner"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </FrameLayout>
     <!--
     <TextView
         android:id="@+id/input_category_text"
@@ -107,6 +83,39 @@
         app:layout_constraintBottom_toTopOf="@+id/input_amount_text"
         app:layout_constraintHeight_default="percent"
         app:layout_constraintHeight_percent="0.09"/>-->
+    <FrameLayout
+        android:id="@+id/input_category_text"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#31FF0000"
+        android:onClick="inputOnClick"
+        app:layout_constraintBottom_toTopOf="@+id/input_amount_text"
+        app:layout_constraintHeight_default="percent"
+        app:layout_constraintHeight_percent="0.09"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/input_date_text">
+
+        <EditText
+            android:id="@+id/empty"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:focusable="true"
+            android:imeOptions="actionDone"
+            android:inputType="text" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="카테고리" />
+        <!--
+        <Spinner
+            android:id="@+id/test_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />-->
+    </FrameLayout>
+
     <TextView
         android:id="@+id/input_amount_text"
         android:layout_width="0dp"

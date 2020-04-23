@@ -23,6 +23,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".InputActivity"/>
+        <activity android:name=".CategoryActivity" android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"/><!-- @style/Theme.AppCompat.DayNight.Dialog -->
     </application>
 
 </manifest>
