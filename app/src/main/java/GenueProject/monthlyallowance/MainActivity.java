@@ -21,6 +21,14 @@ import com.google.android.gms.ads.initialization.OnInitializationCompleteListene
 public class MainActivity extends AppCompatActivity
 {
 	static final private String TAG = "myMain";
+
+	static final private int INPUT_REQUEST_CODE = 0;
+	static final private int CALENDAR_REQUEST_CODE = 1;
+	static final private int HISTORY_REQUEST_CODE = 2;
+
+	static final private int RESULT_CODE_CANCEL = -1;
+
+
 	//광고
 	private AdView mAdView;
 	private FrameLayout mAdLayout;
@@ -182,7 +190,34 @@ public class MainActivity extends AppCompatActivity
 			case R.id.main_menu_input:
 				Log.i(TAG, "input 버튼 눌림");
 				Intent intent = new Intent(this, InputActivity.class);
-				startActivity(intent);
+				startActivityForResult(intent, INPUT_REQUEST_CODE);
+				break;
+			case R.id.main_menu_calendar:
+				Log.i(TAG, "input 버튼 눌림");
+				Intent intent1 = new Intent(this, CalendarActivity.class);
+				startActivityForResult(intent1, CALENDAR_REQUEST_CODE);
+				break;
+			case R.id.main_menu_history:
+				Log.i(TAG, "input 버튼 눌림");
+				Intent intent2 = new Intent(this, HistoryActivity.class);
+				startActivityForResult(intent2, HISTORY_REQUEST_CODE);
+				break;
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		switch(requestCode)
+		{
+			case INPUT_REQUEST_CODE:
+				Log.i(TAG, "input 갔다옴 " + data.getStringExtra("input"));
+				break;
+			case CALENDAR_REQUEST_CODE:
+				Log.i(TAG, "달력 갔다옴 " + data.getStringExtra("calendar"));
+				break;
+			case HISTORY_REQUEST_CODE:
+				Log.i(TAG, "내역 갔다옴 " + data.getStringExtra("history"));
 				break;
 		}
 	}
@@ -210,7 +245,6 @@ public class MainActivity extends AppCompatActivity
 	@Override
 	protected void onDestroy()
 	{
-		super.onDestroy();
 		if(mAdView != null)
 		{
 			mAdView.destroy();

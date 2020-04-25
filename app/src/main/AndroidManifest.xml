@@ -23,7 +23,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".InputActivity"/>
-        <activity android:name=".CategoryActivity" android:theme="@android:style/Theme.Holo.Dialog.NoActionBar"/><!-- @style/Theme.AppCompat.DayNight.Dialog -->
+        <activity android:name=".CategoryActivity" android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar"/><!-- @style/Theme.AppCompat.DayNight.Dialog -->
+        <activity android:name=".InsertActivity" android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar"/>
+        <activity android:name=".CalendarActivity"/>
+        <activity android:name=".HistoryActivity"/>
     </application>
 
 </manifest>

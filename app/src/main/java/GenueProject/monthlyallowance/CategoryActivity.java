@@ -1,15 +1,15 @@
 package GenueProject.monthlyallowance;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,10 +17,16 @@ import java.util.ArrayList;
 
 public class CategoryActivity extends Activity
 {
+	static final private int RESULT_CODE_CANCEL = -1;
+	static final private int RESULT_CODE_INSERT = 0;
+	static final private int RESULT_CODE_ITEM = 1;
+
 	String TAG = "category";
 	RecyclerView recyclerView = null;
 	CategoryAdapter categoryAdapter = null;
 	ArrayList<CategoryItem> list = new ArrayList<CategoryItem>();
+
+	Intent intent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -36,7 +42,24 @@ public class CategoryActivity extends Activity
 
 		recyclerView = findViewById(R.id.category_list);
 
-		categoryAdapter = new CategoryAdapter(list);
+		categoryAdapter = new CategoryAdapter(list, this);
+		categoryAdapter.setOnItemClickListener(new OnCategoryItemClickListener()
+		{
+			@Override
+			public void onItemClick(CategoryAdapter.ViewHolder holder, View view, int position, SparseBooleanArray selectedItems)
+			{
+				Log.i(TAG, "클릭된 카테고리 position : " + position);
+				//클릭되면 파랗게 하고
+				//액티비티 꺼
+				view.setBackgroundColor(Color.BLUE);
+				String name = list.get(position).getName();
+				Log.i(TAG, "선택했어 : " + list.get(position).getName());
+				Intent toPut = new Intent();
+				toPut.putExtra("result", name);
+				setResult(RESULT_CODE_ITEM, toPut);
+				finish();
+			}
+		});
 		recyclerView.setAdapter(categoryAdapter);
 
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -58,15 +81,15 @@ public class CategoryActivity extends Activity
 	{
 		switch(v.getId())
 		{
-			case R.id.okBtn:
-				Intent intent = new Intent();
-				intent.putExtra("result", "오케이");
-				setResult(1, intent);
-				break;
 			case R.id.cancelBtn:
-				Intent intent1 = new Intent();
-				intent1.putExtra("result", "취소");
-				setResult(0, intent1);
+				intent = new Intent();
+				intent.putExtra("result", "취소");
+				setResult(RESULT_CODE_CANCEL, intent);
+				break;
+			case R.id.insertBtn:
+				intent = new Intent();
+				intent.putExtra("result", "오케이");
+				setResult(RESULT_CODE_INSERT, intent);
 				break;
 		}
 		finish();
@@ -83,10 +106,19 @@ public class CategoryActivity extends Activity
 		return true;
 	}
 
-	//백버튼 막기
 	@Override
 	public void onBackPressed()
 	{
-		return;
+		intent = new Intent();
+		intent.putExtra("result", "취소");
+		setResult(RESULT_CODE_CANCEL, intent);
+		finish();
+	}
+
+	@Override
+	protected void onStop()
+	{
+		Log.i(TAG, "category onstop()");
+		super.onStop();
 	}
 }
