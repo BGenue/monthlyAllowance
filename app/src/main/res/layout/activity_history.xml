@@ -59,7 +59,8 @@
             android:layout_height="wrap_content"
             android:text="일자별"
             android:layout_weight="1"
-            android:onClick="onRadioClicked"/>
+            android:onClick="onRadioClicked"
+            android:checked="true"/>
         <RadioButton
             android:id="@+id/history_spend_btn"
             android:layout_width="wrap_content"

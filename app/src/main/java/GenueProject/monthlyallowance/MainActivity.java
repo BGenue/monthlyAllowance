@@ -18,6 +18,8 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
+import java.util.Calendar;
+
 public class MainActivity extends AppCompatActivity
 {
 	static final private String TAG = "myMain";
@@ -38,7 +40,16 @@ public class MainActivity extends AppCompatActivity
 	private TextView arrowR;
 
 	//메인 화면 뷰
+	private TextView top_month_text;
 	private TextView bottom_month_text;
+
+	//날짜
+	private int year;
+	private int month;
+	private int day;
+	private int dayOfWeek;//요일
+	private int week;//주
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -48,7 +59,10 @@ public class MainActivity extends AppCompatActivity
 
 		//Mobile Ads SDK 초기화
 		initAd();
+
 		initView();
+
+		getTodayDate();
 	}
 
 	//광고 관련 함수
@@ -106,31 +120,11 @@ public class MainActivity extends AppCompatActivity
 	//뷰 초기화
 	private void initView()
 	{
-		arrowL = findViewById(R.id.main_bottom_left_arrow);
-		arrowR = findViewById(R.id.main_bottom_right_arrow);
+		arrowL = findViewById(R.id.main_left_arrow);
+		arrowR = findViewById(R.id.main_right_arrow);
 
-		View.OnClickListener Listener = new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View v)
-			{
-				switch(v.getId())
-				{
-					case R.id.main_bottom_left_arrow:
-						Log.i(TAG, "왼쪽 화살표");
-						changeMainView(0);
-						break;
-					case R.id.main_bottom_right_arrow:
-						Log.i(TAG, "오른쪽 화살표");
-						changeMainView(1);
-						break;
-				}
-			}
-		};
-		arrowL.setOnClickListener(Listener);
-		arrowR.setOnClickListener(Listener);
-
-		bottom_month_text = findViewById(R.id.main_bottom_month_text);
+		top_month_text = findViewById(R.id.main_top_month_text);
+		bottom_month_text = findViewById(R.id.main_month_text);
 	}
 
 	private void changeMainView(int i)
@@ -170,15 +164,17 @@ public class MainActivity extends AppCompatActivity
 		}
 	}
 
-	protected void clickHandler(View v)
+	public void clickHandler(View v)
 	{
 		switch(v.getId())
 		{
-			case R.id.main_bottom_left_arrow:
+			case R.id.main_left_arrow:
 				Log.i(TAG, "왼쪽 화살표");
+				changeMainView(0);
 				break;
-			case R.id.main_bottom_right_arrow:
+			case R.id.main_right_arrow:
 				Log.i(TAG, "오른쪽 화살표");
+				changeMainView(1);
 				break;
 		}
 	}
@@ -220,6 +216,16 @@ public class MainActivity extends AppCompatActivity
 				Log.i(TAG, "내역 갔다옴 " + data.getStringExtra("history"));
 				break;
 		}
+	}
+
+	private void getTodayDate()
+	{
+		Calendar calendar = Calendar.getInstance();//오늘날짜
+		year = calendar.get(Calendar.YEAR);//년
+		month = calendar.get(Calendar.MONTH);//월
+		day = calendar.get(Calendar.DAY_OF_MONTH);//일
+		dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);//요일. 일요일 : 1 ~ 토요일 : 7
+		week = calendar.get(Calendar.WEEK_OF_MONTH);//이번달의 몇 째주인지
 	}
 
 	@Override

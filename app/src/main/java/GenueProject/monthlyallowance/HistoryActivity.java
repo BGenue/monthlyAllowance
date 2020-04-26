@@ -14,12 +14,18 @@ public class HistoryActivity extends AppCompatActivity
 {
 	static final private int RESULT_CODE_CANCEL = -1;
 
+	private LayoutInflater layoutInflater;
+	private FrameLayout frameLayout;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);//타이틀 없애기
 		setContentView(R.layout.activity_history);
+
+		//디폴트로 일자별 화면 보여줘
+		setView();
 
 		//자동으로 오늘 날짜 찍어줌
 	}
@@ -43,11 +49,25 @@ public class HistoryActivity extends AppCompatActivity
 		}
 	}
 
+	private void setView()
+	{
+		layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		frameLayout = findViewById(R.id.history_body);
+		if(frameLayout.getChildCount() > 0)
+		{
+			//프레임레이아웃에 뷰가 있으면 삭제해
+			frameLayout.removeViewAt(0);
+		}
+		View view = layoutInflater.inflate(R.layout.activity_history_day, frameLayout, false);
+		frameLayout.addView(view);
+	}
+
 	private void changeView(int index)
 	{
-		LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		FrameLayout frameLayout = findViewById(R.id.history_body);
+		frameLayout = findViewById(R.id.history_body);
 		if(frameLayout.getChildCount() > 0)
 		{
 			//프레임레이아웃에 뷰가 있으면 삭제해
