@@ -40,8 +40,13 @@ public class MainActivity extends AppCompatActivity
 	private TextView arrowR;
 
 	//메인 화면 뷰
-	private TextView top_month_text;
-	private TextView bottom_month_text;
+	private TextView top_month_title;
+	private TextView main_middle_title;
+	private TextView main_middle_text;
+	private TextView main_total_spend_text;
+	private TextView main_total_earn_text;
+	private TextView main_total_save_text;
+	private TextView main_last_text;
 
 	//날짜
 	private int year;
@@ -50,6 +55,12 @@ public class MainActivity extends AppCompatActivity
 	private int dayOfWeek;//요일
 	private int week;//주
 
+	//db
+	static final private String TABLE_CATEGORY = "Category";
+	static final private String TABLE_ITEMS = "Item";
+	static final private String TABLE_DATE = "Date";
+	static final private String TABLE_HISTORY = "History";
+	private AllowanceDatabaseManager dbManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -63,6 +74,10 @@ public class MainActivity extends AppCompatActivity
 		initView();
 
 		getTodayDate();
+
+		dbManager = AllowanceDatabaseManager.getInstance(this);
+		dbManager.show();//삭제
+		dbManager.show_1();
 	}
 
 	//광고 관련 함수
@@ -123,43 +138,78 @@ public class MainActivity extends AppCompatActivity
 		arrowL = findViewById(R.id.main_left_arrow);
 		arrowR = findViewById(R.id.main_right_arrow);
 
-		top_month_text = findViewById(R.id.main_top_month_text);
-		bottom_month_text = findViewById(R.id.main_month_text);
+		top_month_title = findViewById(R.id.main_top_month_text);
+		main_middle_title = findViewById(R.id.main_middle_title);
+		main_middle_text = findViewById(R.id.main_middle_text);
+		main_total_spend_text = findViewById(R.id.main_total_spend_text);
+		main_total_earn_text = findViewById(R.id.main_total_earn_text);
+		main_total_save_text = findViewById(R.id.main_total_save_text);
+		main_last_text = findViewById(R.id.main_last_text);
 	}
 
 	private void changeMainView(int i)
 	{
-		if(bottom_month_text.getText().equals("월별"))
+		if(main_middle_title.getText().equals("월별"))
 		{
 			if(i == 0)
 			{
-				bottom_month_text.setText("일별");
+				main_middle_title.setText("일별");
+				main_middle_text.setText(month + "월 " + day + "일");
+				main_total_spend_text.setText("일별 지출");
+				main_total_earn_text.setText("일별 수입");
+				main_total_save_text.setText("일별 저금");
+				main_last_text.setText("일별 잔금");
 			}
 			else
 			{
-				bottom_month_text.setText("주별");
+				main_middle_title.setText("주별");
+				main_middle_text.setText(month + "월" + week + "주차");
+				main_total_spend_text.setText("주별 지출");
+				main_total_earn_text.setText("주별 수입");
+				main_total_save_text.setText("주별 저금");
+				main_last_text.setText("주별 잔금");
 			}
 		}
-		else if(bottom_month_text.getText().equals("주별"))
+		else if(main_middle_title.getText().equals("주별"))
 		{
 			if(i == 0)
 			{
-				bottom_month_text.setText("월별");
+				main_middle_title.setText("월별");
+				main_middle_text.setText(month + "월 전체");
+				main_total_spend_text.setText("월별 지출");
+				main_total_earn_text.setText("월별 수입");
+				main_total_save_text.setText("월별 저금");
+				main_last_text.setText("월별 잔금");
 			}
 			else
 			{
-				bottom_month_text.setText("일별");
+				main_middle_title.setText("일별");
+				main_middle_text.setText(month+"월 " + day + "일");
+				main_total_spend_text.setText("일별 지출");
+				main_total_earn_text.setText("일별 수입");
+				main_total_save_text.setText("일별 저금");
+				main_last_text.setText("일별 잔금");
 			}
 		}
 		else
 		{
 			if(i == 0)
 			{
-				bottom_month_text.setText("주별");
+				main_middle_title.setText("주별");
+				main_middle_text.setText(month + "월" + week + "주");
+				main_total_spend_text.setText("주별 지출");
+				main_total_earn_text.setText("주별 수입");
+				main_total_save_text.setText("주별 저금");
+				main_last_text.setText("주별 잔금");
 			}
 			else
 			{
-				bottom_month_text.setText("월별");
+				main_middle_title.setText("월별");
+				main_middle_text.setText(month + "월 전체");
+				main_total_spend_text.setText("월별 지출");
+				main_total_earn_text.setText("월별 수입");
+				main_total_save_text.setText("월별 저금");
+				main_last_text.setText("월별 잔금");
 			}
 		}
 	}
@@ -222,10 +272,12 @@ public class MainActivity extends AppCompatActivity
 	{
 		Calendar calendar = Calendar.getInstance();//오늘날짜
 		year = calendar.get(Calendar.YEAR);//년
-		month = calendar.get(Calendar.MONTH);//월
+		month = calendar.get(Calendar.MONTH)+1;//월
 		day = calendar.get(Calendar.DAY_OF_MONTH);//일
 		dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);//요일. 일요일 : 1 ~ 토요일 : 7
 		week = calendar.get(Calendar.WEEK_OF_MONTH);//이번달의 몇 째주인지
+
+		top_month_title.setText(month + "월 시작");
 	}
 
 	@Override
