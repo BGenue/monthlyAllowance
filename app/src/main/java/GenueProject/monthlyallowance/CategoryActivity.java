@@ -26,6 +26,8 @@ public class CategoryActivity extends Activity
 	CategoryAdapter categoryAdapter = null;
 	ArrayList<CategoryItem> list = new ArrayList<CategoryItem>();
 
+	AllowanceDatabaseManager dbManager;
+
 	Intent intent;
 
 	@Override
@@ -39,6 +41,7 @@ public class CategoryActivity extends Activity
 		String data = intent.getStringExtra("category");
 		Log.i(TAG, "인텐트 받았엉 " + data);
 
+		dbManager = AllowanceDatabaseManager.getInstance(this);
 
 		recyclerView = findViewById(R.id.category_list);
 

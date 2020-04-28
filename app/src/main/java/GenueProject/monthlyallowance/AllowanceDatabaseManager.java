@@ -90,7 +90,9 @@ public class AllowanceDatabaseManager extends SQLiteOpenHelper
 	private void initTable(SQLiteDatabase db)
 	{
 		//oncreate 때 한번만 사용됨
+
 		//TABLE_CATEGORY
+		Log.i(TAG, "initTable()");
 		ContentValues addRowValue = new ContentValues();
 		addRowValue.put("c_id", 0);
 		addRowValue.put("category", "지출");
@@ -108,6 +110,18 @@ public class AllowanceDatabaseManager extends SQLiteOpenHelper
 		addRowValue = new ContentValues();
 		addRowValue.put("item", "점심 밥");
 		addRowValue.put("c_id", "0");
+		db.insert(TABLE_ITEMS, null, addRowValue);
+		addRowValue = new ContentValues();
+		addRowValue.put("item", "저녁 밥");
+		addRowValue.put("c_id", "0");
+		db.insert(TABLE_ITEMS, null, addRowValue);
+		addRowValue = new ContentValues();
+		addRowValue.put("item", "커피");
+		addRowValue.put("c_id", "0");
+		db.insert(TABLE_ITEMS, null, addRowValue);
+		addRowValue = new ContentValues();
+		addRowValue.put("item", "용돈");
+		addRowValue.put("c_id", "1");
 		db.insert(TABLE_ITEMS, null, addRowValue);
 	}
 
@@ -127,12 +141,14 @@ public class AllowanceDatabaseManager extends SQLiteOpenHelper
 
 	public void show_1()
 	{
-		Cursor c = DB.rawQuery("SELECT i_id, item, c_id, category FROM " + TABLE_CATEGORY + ", " + TABLE_ITEMS, null);
+		Cursor c = DB.rawQuery("SELECT DISTINCT * FROM " + TABLE_CATEGORY + ", " + TABLE_ITEMS + " WHERE " + TABLE_CATEGORY + ".c_id=" + TABLE_ITEMS + ".c_id", null);
+		Log.i(TAG, "show_1 결과  행 갯수 : " + c.getCount() + " 열 갯수 : " + c.getColumnCount());
 		while(c.moveToNext())
 		{
 			if(c != null)
 			{
-				Log.i(TAG, "디비 내용 : " + c.getInt(0) + " " + c.getString(1) + " " + c.getInt(2) + " " + c.getString(3));
+				Log.i(TAG, " show_1 내용 : " + c.getColumnName(0) + " | " + c.getColumnName(1) + " | "  + c.getColumnName(2) + " | "  + c.getColumnName(3) + " | " + c.getColumnName(4) + " | ");
+				Log.i(TAG, " show_1 내용 : " + c.getInt(0) + " | " + c.getString(1) + " | "  + c.getInt(2) + " | "  + c.getString(3) + " | " + c.getInt(4) + " | ");
 			}
 		}
 	}
@@ -145,7 +161,7 @@ public class AllowanceDatabaseManager extends SQLiteOpenHelper
 		{
 			if(c != null)
 			{
-				Log.i(TAG, "디비 내용 : " + c.getInt(0) + " " + c.getString(1));
+				Log.i(TAG, "TABLE_CATEGORY 내용 : " + c.getInt(0) + " " + c.getString(1));
 			}
 		}
 		c = DB.query(TABLE_ITEMS, new String[]{"i_id, item, c_id"}, null, null, null, null, null);
@@ -153,7 +169,7 @@ public class AllowanceDatabaseManager extends SQLiteOpenHelper
 		{
 			if(c != null)
 			{
-				Log.i(TAG, "디비 내용 : " + c.getInt(0) + " " + c.getString(1) + " " + c.getInt(2));
+				Log.i(TAG, "TABLE_ITEMS 내용 : " + c.getInt(0) + " " + c.getString(1) + " " + c.getInt(2));
 			}
 		}
 	}

@@ -38,18 +38,29 @@ public class InputActivity extends AppCompatActivity
 
 	String TAG = "myInput";
 
-	ArrayList arrayList;
-	EditText empty;
-	Spinner s;
-
 	Button dateBtn;
 	TextView categoryTitle;
 
+
+	////////////////////////////////////
+	//// main으로 보내줄 데이터들
+	Intent intent;
+	//라디오버튼
+	private String category;
 	//보여줄 날짜
 	private int year;
 	private int month;
 	private int day;
 	private int week;
+	//항목
+	private String item;
+	//금액
+	private int amount;
+	//내용
+	private String contents;
+	//저금 +/-
+	private int minus;
+	////////////////////////////////////
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -57,15 +68,6 @@ public class InputActivity extends AppCompatActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_input);
 		initView();
-
-
-		arrayList = new ArrayList<>();
-		arrayList.add("철수");
-		arrayList.add("영희");
-		arrayList.add("녹지");
-		arrayList.add("치치");
-		arrayList.add("용병");
-		arrayList.add("입력");
 	}
 
 	private void initView()
@@ -85,7 +87,7 @@ public class InputActivity extends AppCompatActivity
 			case R.id.input_category:
 				Log.i(TAG, "카테고리 눌림");
 				Intent intent = new Intent(this, CategoryActivity.class);
-				intent.putExtra("category", "popup");
+				intent.putExtra("category", category);
 				startActivityForResult(intent, CATEGORY_REQUEST_CODE);
 				break;
 		}
@@ -242,15 +244,21 @@ public class InputActivity extends AppCompatActivity
 		{
 			case R.id.spend_radio_button:
 				Log.i(TAG, "지출");
+				category = "지출";
 				break;
 			case R.id.earn_radio_button:
 				Log.i(TAG, "수입");
+				category = "수입";
 				break;
 			case R.id.saveP_radio_button:
 				Log.i(TAG, "저금 플러스");
+				category = "저금";
+				minus = 0;
 				break;
 			case R.id.saveM_radio_button:
 				Log.i(TAG, "저금 마이너스");
+				category = "저금";
+				minus = 1;
 				break;
 		}
 	}
@@ -260,15 +268,26 @@ public class InputActivity extends AppCompatActivity
 		switch(v.getId())
 		{
 			case R.id.input_save_btn:
-				Intent intent = new Intent();
+				intent = new Intent();
 				intent.putExtra("input", "저장");
+				intent.putExtra("category", category);
+				intent.putExtra("year", year);
+				intent.putExtra("month", month);
+				intent.putExtra("day", day);
+				EditText moneyText = findViewById(R.id.input_money_text);
+				amount = Integer.parseInt(moneyText.getText().toString());
+				intent.putExtra("amount", amount);
+				EditText editText = findViewById(R.id.input_explain_text);
+				contents = editText.getText().toString();
+				intent.putExtra("contents", contents);
+				intent.putExtra("minus", minus);
 				setResult(RESULT_CODE_INSERT, intent);
 				finish();
 				break;
 			case R.id.input_cancel_btn:
-				Intent intent1 = new Intent();
-				intent1.putExtra("input", "취소");
-				setResult(RESULT_CODE_CANCEL, intent1);
+				intent = new Intent();
+				intent.putExtra("input", "취소");
+				setResult(RESULT_CODE_CANCEL, intent);
 				finish();
 				break;
 		}
