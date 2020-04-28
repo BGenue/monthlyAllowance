@@ -10,6 +10,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -36,22 +37,32 @@ public class InputActivity extends AppCompatActivity
 	//카테고리 액티비티
 	static final private int RESULT_CODE_ITEM = 1;
 
+	static final private int NEGATIVE = -1;
+	//디비 관련
+	static final private int CATEGORY_SPEND = 0;
+	static final private int CATEGORY_EARN = 1;
+	static final private int CATEGORY_SAVEP = 2;
+	static final private int CATEGORY_SAVEM = 3;
+
+	private AllowanceDatabaseManager dbManager;
+
 	String TAG = "myInput";
 
 	Button dateBtn;
-	TextView categoryTitle;
+	private TextView categoryName;
 
 
 	////////////////////////////////////
 	//// main으로 보내줄 데이터들
 	Intent intent;
 	//라디오버튼
-	private String category;
+	private int category;//지출 : 0  수입 : 1 저금 : 2
 	//보여줄 날짜
 	private int year;
 	private int month;
 	private int day;
-	private int week;
+	private int dayOfWeek;//요일
+	private String week;//요일
 	//항목
 	private String item;
 	//금액
@@ -66,14 +77,24 @@ public class InputActivity extends AppCompatActivity
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		Log.i(TAG, "oncreate()");
 		setContentView(R.layout.activity_input);
+		Intent intent = getIntent();
+		category = NEGATIVE;
+		year = intent.getIntExtra("year", 0);
+		month = intent.getIntExtra("month", 0);
+		day = intent.getIntExtra("day", 0);
+		dayOfWeek = intent.getIntExtra("dayOfWeek", 0);
+		week = changeWeek(dayOfWeek);
 		initView();
+		dbManager = AllowanceDatabaseManager.getInstance(this);
 	}
 
 	private void initView()
 	{
 		dateBtn = findViewById(R.id.input_date_text);
-		categoryTitle = findViewById(R.id.input_category_title);
+		dateBtn.setText(year + "." + month + "." + day + " (" + week + ")");
+		categoryName = findViewById(R.id.input_category_text);
 	}
 
 	public void inputOnClick(View v)
@@ -86,9 +107,17 @@ public class InputActivity extends AppCompatActivity
 				break;
 			case R.id.input_category:
 				Log.i(TAG, "카테고리 눌림");
-				Intent intent = new Intent(this, CategoryActivity.class);
-				intent.putExtra("category", category);
-				startActivityForResult(intent, CATEGORY_REQUEST_CODE);
+				Log.i(TAG, "다 저장되어 있나??? " + year);
+				if(category != NEGATIVE)
+				{
+					Intent intent = new Intent(this, CategoryActivity.class);
+					intent.putExtra("category", category);
+					startActivityForResult(intent, CATEGORY_REQUEST_CODE);
+				}
+				else
+				{
+					Log.i(TAG, "카테고리 눌렸지만 카테고리 선택을 안했음");
+				}
 				break;
 		}
 	}
@@ -108,14 +137,14 @@ public class InputActivity extends AppCompatActivity
 			{
 				Log.i(TAG, "category 갔다옴. 추가 눌림 " + data.getStringExtra("result"));
 				Intent insert = new Intent(this, InsertActivity.class);
-				insert.putExtra("insert", "popup");
+				insert.putExtra("category", category);
 				startActivityForResult(insert, INSERT_REQUEST_CODE);//insert 으로 넘어가
 			}
 			else if(resultCode == RESULT_CODE_ITEM)
 			{
 				Log.i(TAG, "category 갔다옴. 항목 눌림 " + data.getStringExtra("result"));
-				TextView categoryName = findViewById(R.id.input_category_title);
 				categoryName.setText(data.getStringExtra("result"));
+				Log.i(TAG, "다 저장되어 있나??? " + year);
 			}
 		}
 		if(requestCode == INSERT_REQUEST_CODE)
@@ -129,17 +158,37 @@ public class InputActivity extends AppCompatActivity
 			else if(resultCode == RESULT_CODE_INSERT)
 			{
 				//확인
-				Log.i(TAG, "추가 갔다옴 " + data.getStringExtra("insert") + " " + data.getStringExtra("category"));
-				if(data.getStringExtra("name").length() != 0)
+				Log.i(TAG, "추가 갔다옴 " + data.getStringExtra("insert") + " " + data.getIntExtra("category", NEGATIVE));
+				if(data.getStringExtra("item").length() != 0)
 				{
-					Log.i(TAG, "항목 " + data.getStringExtra("name"));
-					TextView categoryName = findViewById(R.id.input_category_title);
-					categoryName.setText(data.getStringExtra("name"));
+					Log.i(TAG, "항목 " + data.getStringExtra("item"));
+					categoryName.setText(data.getStringExtra("item"));
+					category = data.getIntExtra("category", NEGATIVE);
+					dbManager.insert(category, data.getStringExtra("item"));
+					if(category == CATEGORY_SPEND)
+					{
+						RadioButton radioButton = findViewById(R.id.spend_radio_button);
+						radioButton.setChecked(true);
+					}
+					else if(category == CATEGORY_EARN)
+					{
+						RadioButton radioButton = findViewById(R.id.earn_radio_button);
+						radioButton.setChecked(true);
+					}
+					else if(category == CATEGORY_SAVEP)
+					{
+						RadioButton radioButton = findViewById(R.id.saveP_radio_button);
+						radioButton.setChecked(true);
+					}
+					else if(category == CATEGORY_SAVEM)
+					{
+						RadioButton radioButton = findViewById(R.id.saveM_radio_button);
+						radioButton.setChecked(true);
+					}
 				}
 				else
 				{
 					Log.i(TAG, "돈 안 적음");
-					TextView categoryName = findViewById(R.id.input_category_title);
 					categoryName.setText("선택하세요");
 				}
 			}
@@ -161,6 +210,7 @@ public class InputActivity extends AppCompatActivity
 		myCalenderDialog.show();
 		 */
 
+		//달력에서 날짜 선택 후 확인 시
 		DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener()
 		{
 			@Override
@@ -179,19 +229,18 @@ public class InputActivity extends AppCompatActivity
 				Log.i(TAG, date);
 
 				dateBtn.setText(date);
-				categoryTitle.setText("선택하세요");
+				categoryName.setText("선택하세요");
 			}
 		};
 
 		//year, month, day 기준으로 달력보여줘
-		DatePickerDialog dialog = new DatePickerDialog(this, android.R.style.Theme_DeviceDefault_Light_Dialog, mDateSetListener,year, month, day);
+		DatePickerDialog dialog = new DatePickerDialog(this, android.R.style.Theme_DeviceDefault_Light_Dialog, mDateSetListener, year, month, day);
 		dialog.show();
 
 
 		/* 고쳐야 할 것
 
 		커스텀 달력으로 바꾸기
-		누른 날짜 받기
 		 */
 	}
 
@@ -201,9 +250,9 @@ public class InputActivity extends AppCompatActivity
 		calendar.set(Calendar.YEAR, year);
 		calendar.set(Calendar.MONTH, month);
 		calendar.set(Calendar.DAY_OF_MONTH, day);
-		week = calendar.get(Calendar.DAY_OF_WEEK);
+		dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 
-		return changeWeek(week);
+		return changeWeek(dayOfWeek);
 	}
 
 	private String changeWeek(int w)
@@ -244,29 +293,25 @@ public class InputActivity extends AppCompatActivity
 		{
 			case R.id.spend_radio_button:
 				Log.i(TAG, "지출");
-				category = "지출";
+				category = CATEGORY_SPEND;
 				break;
 			case R.id.earn_radio_button:
 				Log.i(TAG, "수입");
-				category = "수입";
+				category = CATEGORY_EARN;
 				break;
 			case R.id.saveP_radio_button:
 				Log.i(TAG, "저금 플러스");
-				category = "저금";
-				minus = 0;
+				category = CATEGORY_SAVEP;
 				break;
 			case R.id.saveM_radio_button:
 				Log.i(TAG, "저금 마이너스");
-				category = "저금";
-				minus = 1;
+				category = CATEGORY_SAVEM;
 				break;
 		}
 	}
 
-	public void onBtnClick(View v)
-	{
-		switch(v.getId())
-		{
+	public void onBtnClick(View v) {
+		switch (v.getId()) {
 			case R.id.input_save_btn:
 				intent = new Intent();
 				intent.putExtra("input", "저장");

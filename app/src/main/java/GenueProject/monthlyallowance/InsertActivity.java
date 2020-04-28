@@ -7,20 +7,31 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
+import android.widget.RadioButton;
 
 public class InsertActivity extends Activity
 {
 	String TAG = "insert";
-	static final private int RESULT_CODE_SPEND = 0;//삭제
-	static final private int RESULT_CODE_EARN = 1;//삭제
-	static final private int RESULT_CODE_SAVE = 2;//삭제
 
 	static final private int RESULT_CODE_INSERT = 0;
 	static final private int RESULT_CODE_CANCEL = -1;
 
-	private int result_code;
+	static final private int CATEGORY_SPEND = 0;
+	static final private int CATEGORY_EARN = 1;
+	static final private int CATEGORY_SAVEP = 2;
+	static final private int CATEGORY_SAVEM = 3;
+
+	static final private int NEGATIVE = -1;
+
 	private Intent toInputIntent;
 	private EditText nameText;
+
+	private int category;
+	private String item;
+
+	AllowanceDatabaseManager dbManager;
+
+	private RadioButton radioButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -30,8 +41,24 @@ public class InsertActivity extends Activity
 		setContentView(R.layout.activity_insert);
 
 		Intent intent = getIntent();
-		String data = intent.getStringExtra("insert");
-		Log.i(TAG, "인텐트 받았엉 " + data);
+		category = intent.getIntExtra("category", NEGATIVE);
+		Log.i(TAG, "인텐트 받았엉 " + category);
+
+		if(category == CATEGORY_SPEND)
+		{
+			radioButton = findViewById(R.id.insert_spend_btn);
+		}
+		else if(category == CATEGORY_EARN)
+		{
+			radioButton = findViewById(R.id.insert_earn_btn);
+		}
+		else if(category == CATEGORY_SAVEP || category == CATEGORY_SAVEM)
+		{
+			radioButton = findViewById(R.id.insert_save_btn);
+		}
+		radioButton.setChecked(true);
+
+		dbManager = AllowanceDatabaseManager.getInstance(this);
 
 		toInputIntent = new Intent();
 		nameText = findViewById(R.id.insert_name);
@@ -41,16 +68,13 @@ public class InsertActivity extends Activity
 	{
 		switch(v.getId()) {
 			case R.id.insert_spend_btn:
-				toInputIntent.putExtra("category", "지출");
-				result_code = RESULT_CODE_SPEND;//삭제
+				category = CATEGORY_SPEND;
 				break;
 			case R.id.insert_earn_btn:
-				toInputIntent.putExtra("category", "수입");
-				result_code = RESULT_CODE_EARN;//삭제
+				category = CATEGORY_EARN;
 				break;
 			case R.id.insert_save_btn:
-				toInputIntent.putExtra("category", "저금");
-				result_code = RESULT_CODE_SAVE;//삭제
+				category = CATEGORY_SAVEP;//디폴트는 P
 				break;
 		}
 	}
@@ -69,9 +93,18 @@ public class InsertActivity extends Activity
 				break;
 			case R.id.insert_ok_btn:
 				toInputIntent.putExtra("insert", "확인");
-				toInputIntent.putExtra("name", nameText.getText().toString());
-				setResult(RESULT_CODE_INSERT, toInputIntent);
-				finish();
+				toInputIntent.putExtra("category", category);
+				item = nameText.getText().toString();
+				if(item.length() != 0)
+				{
+					toInputIntent.putExtra("item", item);
+					setResult(RESULT_CODE_INSERT, toInputIntent);
+					finish();
+				}
+				else
+				{
+					Log.i(TAG, "입력해햐해");
+				}
 				break;
 		}
 	}

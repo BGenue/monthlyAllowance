@@ -19,6 +19,10 @@ public class AllowanceDatabaseManager extends SQLiteOpenHelper
 	static final private String TABLE_DATE = "Date";
 	static final private String TABLE_HISTORY = "History";
 
+	static final private int CATEGORY_SPEND = 0;
+	static final private int CATEGORY_EARN = 1;
+	static final private int CATEGORY_SAVE = 2;
+
 	static private int DB_VERSION = 1;
 
 	private static AllowanceDatabaseManager allowanceDatabaseManager = null;
@@ -174,9 +178,17 @@ public class AllowanceDatabaseManager extends SQLiteOpenHelper
 		}
 	}
 
-	//추가
-	public long insert(String tableName, ContentValues addRowValue)
+	public void insert(int category, String item)
 	{
+		Log.i("myInput", category + " " + item);
+		ContentValues addRowValue = new ContentValues();
+		addRowValue.put("item", item);
+		addRowValue.put("c_id", category);
+		DB.insert(TABLE_ITEMS, null, addRowValue);
+	}
+	//추가
+	private long insertDB(String tableName, ContentValues addRowValue)
+		{
 		return DB.insert(tableName, null, addRowValue);
 	}
 
@@ -186,5 +198,11 @@ public class AllowanceDatabaseManager extends SQLiteOpenHelper
 		//colums : new String[] {"title", "grade"}
 		//selection : category = "액션"
 		return DB.query(tableName, colums, selection, selectionArgs, groupBy, having, orderby);
+	}
+
+	public Cursor rawQuery(String sql, String[] selectionArgs)
+	{
+		Log.i("category", "rawQuery");
+		return DB.rawQuery(sql, selectionArgs);
 	}
 }

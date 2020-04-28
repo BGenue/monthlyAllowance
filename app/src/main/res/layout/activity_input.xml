@@ -62,7 +62,6 @@
         android:id="@+id/input_date_text"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:text="2020.4.20 (월)"
         android:autoSizeTextType="uniform"
         android:onClick="inputOnClick"
         app:layout_constraintTop_toBottomOf="@+id/input_radio_group"
@@ -101,7 +100,7 @@
             android:layout_height="wrap_content"
             android:text="카테고리" />
         <TextView
-            android:id="@+id/input_category_title"
+            android:id="@+id/input_category_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"

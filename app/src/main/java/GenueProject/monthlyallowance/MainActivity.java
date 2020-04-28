@@ -236,6 +236,10 @@ public class MainActivity extends AppCompatActivity
 			case R.id.main_menu_input:
 				Log.i(TAG, "input 버튼 눌림");
 				Intent intent = new Intent(this, InputActivity.class);
+				intent.putExtra("year", year);
+				intent.putExtra("month", month);
+				intent.putExtra("day", day);
+				intent.putExtra("dayOfWeek", dayOfWeek);
 				startActivityForResult(intent, INPUT_REQUEST_CODE);
 				break;
 			case R.id.main_menu_calendar:
