@@ -6,17 +6,16 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
+import org.w3c.dom.Text;
+
 import java.util.Calendar;
 
 public class InputActivity extends AppCompatActivity
@@ -24,6 +23,7 @@ public class InputActivity extends AppCompatActivity
 	//액티비티 구분 코드
 	static final private int CATEGORY_REQUEST_CODE = 1;
 	static final private int INSERT_REQUEST_CODE = 2;
+	static final private int CALCULATOR_REQUEST_CODE = 4;
 
 	//인서트 액티비티
 	static final private int RESULT_CODE_SPEND = 0;
@@ -41,8 +41,9 @@ public class InputActivity extends AppCompatActivity
 	//디비 관련
 	static final private int CATEGORY_SPEND = 0;
 	static final private int CATEGORY_EARN = 1;
-	static final private int CATEGORY_SAVEP = 2;
-	static final private int CATEGORY_SAVEM = 3;
+	static final private int CATEGORY_SAVE = 2;
+	static final private int CATEGORY_SAVEP = 3;
+	static final private int CATEGORY_SAVEM = 4;
 
 	private AllowanceDatabaseManager dbManager;
 
@@ -50,6 +51,9 @@ public class InputActivity extends AppCompatActivity
 
 	Button dateBtn;
 	private TextView categoryName;
+	private TextView durationText;
+	private TextView moneyText;
+
 
 
 	////////////////////////////////////
@@ -66,12 +70,15 @@ public class InputActivity extends AppCompatActivity
 	//항목
 	private String item;
 	//금액
-	private int amount;
+	private long amount;
 	//내용
 	private String contents;
+	//기간
+	private long duration;
 	//저금 +/-
-	private int minus;
 	////////////////////////////////////
+
+	private int touchable;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -86,8 +93,11 @@ public class InputActivity extends AppCompatActivity
 		day = intent.getIntExtra("day", 0);
 		dayOfWeek = intent.getIntExtra("dayOfWeek", 0);
 		week = changeWeek(dayOfWeek);
-		initView();
 		dbManager = AllowanceDatabaseManager.getInstance(this);
+
+		initView();
+		duration = 0;
+		amount = 0;
 	}
 
 	private void initView()
@@ -95,6 +105,36 @@ public class InputActivity extends AppCompatActivity
 		dateBtn = findViewById(R.id.input_date_text);
 		dateBtn.setText(year + "." + month + "." + day + " (" + week + ")");
 		categoryName = findViewById(R.id.input_category_text);
+		durationText = findViewById(R.id.input_duration_text);
+		moneyText = findViewById(R.id.input_money_text);
+	}
+
+	public void onRadioClicked(View v)
+	{
+		switch(v.getId())
+		{
+			case R.id.spend_radio_button:
+				Log.i(TAG, "지출");
+				category = CATEGORY_SPEND;
+				break;
+			case R.id.earn_radio_button:
+				Log.i(TAG, "수입");
+				category = CATEGORY_EARN;
+				break;
+			case R.id.saveP_radio_button:
+				Log.i(TAG, "저금 플러스");
+				category = CATEGORY_SAVEP;
+				break;
+			case R.id.saveM_radio_button:
+				Log.i(TAG, "저금 마이너스");
+				category = CATEGORY_SAVEM;
+				break;
+		}
+		categoryName.setText("선택하세요");
+		moneyText.setText("입력하세요");
+		durationText.setText("0 개월");
+		duration = 0;
+		amount = 0;
 	}
 
 	public void inputOnClick(View v)
@@ -107,10 +147,9 @@ public class InputActivity extends AppCompatActivity
 				break;
 			case R.id.input_category:
 				Log.i(TAG, "카테고리 눌림");
-				Log.i(TAG, "다 저장되어 있나??? " + year);
 				if(category != NEGATIVE)
 				{
-					Intent intent = new Intent(this, CategoryActivity.class);
+					intent = new Intent(this, CategoryActivity.class);
 					intent.putExtra("category", category);
 					startActivityForResult(intent, CATEGORY_REQUEST_CODE);
 				}
@@ -119,79 +158,165 @@ public class InputActivity extends AppCompatActivity
 					Log.i(TAG, "카테고리 눌렸지만 카테고리 선택을 안했음");
 				}
 				break;
+			case R.id.input_money:
+				Log.i(TAG, "금액 눌림 "+ amount);
+				intent = new Intent(this, myCalculator.class);
+				intent.putExtra("money", amount);
+				intent.putExtra("type", " 원");
+				startActivityForResult(intent, CALCULATOR_REQUEST_CODE);
+				break;
+			case R.id.input_duration:
+				Log.i(TAG, "기한 눌림");
+				intent = new Intent(this, myCalculator.class);
+				intent.putExtra("money", duration);
+				intent.putExtra("type", " 개월");
+				startActivityForResult(intent, CALCULATOR_REQUEST_CODE);
+				break;
+		}
+	}
+
+	public void onBtnClick(View v) {
+		switch (v.getId()) {
+			case R.id.input_save_btn:
+				intent = new Intent();
+				intent.putExtra("input", "저장");
+				intent.putExtra("category", category);
+				intent.putExtra("item", item);
+				intent.putExtra("year", year);
+				intent.putExtra("month", month);
+				intent.putExtra("day", day);
+				String tmp = moneyText.getText().toString();
+				intent.putExtra("amount", amount);
+				EditText editText = findViewById(R.id.input_explain_text);
+				contents = editText.getText().toString();
+				intent.putExtra("contents", contents);
+				tmp = durationText.getText().toString();
+				int duration = Integer.parseInt(tmp.substring(0, tmp.length()-3));
+				intent.putExtra("duration", duration);
+				setResult(RESULT_CODE_INSERT, intent);
+				finish();
+				break;
+			case R.id.input_cancel_btn:
+				intent = new Intent();
+				intent.putExtra("input", "취소");
+				setResult(RESULT_CODE_CANCEL, intent);
+				finish();
+				break;
 		}
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		if(requestCode == CATEGORY_REQUEST_CODE)
+		switch(requestCode)
 		{
-			//카테고리 갔다옴
-			//갔다온 코드
-			if(resultCode == RESULT_CODE_CANCEL)
-			{
-				Log.i(TAG, "category 갔다옴. 취소 눌림 " + data.getStringExtra("result"));
-			}
-			else if(resultCode == RESULT_CODE_INSERT)
-			{
-				Log.i(TAG, "category 갔다옴. 추가 눌림 " + data.getStringExtra("result"));
-				Intent insert = new Intent(this, InsertActivity.class);
-				insert.putExtra("category", category);
-				startActivityForResult(insert, INSERT_REQUEST_CODE);//insert 으로 넘어가
-			}
-			else if(resultCode == RESULT_CODE_ITEM)
-			{
-				Log.i(TAG, "category 갔다옴. 항목 눌림 " + data.getStringExtra("result"));
-				categoryName.setText(data.getStringExtra("result"));
-				Log.i(TAG, "다 저장되어 있나??? " + year);
-			}
-		}
-		if(requestCode == INSERT_REQUEST_CODE)
-		{
-			//추가 갔다옴
-			if(resultCode == RESULT_CODE_CANCEL)
-			{
-				//취소
-				Log.i(TAG, "추가 갔다옴 " + data.getStringExtra("insert"));
-			}
-			else if(resultCode == RESULT_CODE_INSERT)
-			{
-				//확인
-				Log.i(TAG, "추가 갔다옴 " + data.getStringExtra("insert") + " " + data.getIntExtra("category", NEGATIVE));
-				if(data.getStringExtra("item").length() != 0)
+			case CATEGORY_REQUEST_CODE:
+				//카테고리 갔다옴
+				//갔다온 코드
+				switch(resultCode)
 				{
-					Log.i(TAG, "항목 " + data.getStringExtra("item"));
-					categoryName.setText(data.getStringExtra("item"));
-					category = data.getIntExtra("category", NEGATIVE);
-					dbManager.insert(category, data.getStringExtra("item"));
-					if(category == CATEGORY_SPEND)
-					{
-						RadioButton radioButton = findViewById(R.id.spend_radio_button);
-						radioButton.setChecked(true);
-					}
-					else if(category == CATEGORY_EARN)
-					{
-						RadioButton radioButton = findViewById(R.id.earn_radio_button);
-						radioButton.setChecked(true);
-					}
-					else if(category == CATEGORY_SAVEP)
-					{
-						RadioButton radioButton = findViewById(R.id.saveP_radio_button);
-						radioButton.setChecked(true);
-					}
-					else if(category == CATEGORY_SAVEM)
-					{
-						RadioButton radioButton = findViewById(R.id.saveM_radio_button);
-						radioButton.setChecked(true);
-					}
+					case RESULT_CODE_CANCEL :
+						Log.i(TAG, "category 갔다옴. 취소 눌림 " + data.getStringExtra("result"));
+						break;
+					case RESULT_CODE_INSERT :
+						Log.i(TAG, "category 갔다옴. 추가 눌림 " + data.getStringExtra("result") + " " + data.getIntExtra("category", -1));
+						Intent insert = new Intent(this, InsertActivity.class);
+						insert.putExtra("category", data.getIntExtra("category", -1));
+						startActivityForResult(insert, INSERT_REQUEST_CODE);//insert 으로 넘어가
+						break;
+					case RESULT_CODE_ITEM :
+						Log.i(TAG, "category 갔다옴. 항목 눌림 " + data.getStringExtra("result"));
+						item = data.getStringExtra("result");
+						categoryName.setText(data.getStringExtra("result"));
+						Log.i("myMain", "다 저장되어 있나??? " + category);
+						break;
 				}
-				else
+				break;
+			case INSERT_REQUEST_CODE:
+				switch(resultCode)
 				{
-					Log.i(TAG, "돈 안 적음");
-					categoryName.setText("선택하세요");
+					//추가 갔다옴
+					case RESULT_CODE_CANCEL:
+						//취소
+						Log.i(TAG, "추가 갔다옴 " + data.getStringExtra("insert"));
+						break;
+					case RESULT_CODE_INSERT:
+						//확인
+						int select;
+						Log.i(TAG, "추가 갔다옴 " + data.getStringExtra("insert") + " " + data.getIntExtra("category", NEGATIVE));
+						if(data.getStringExtra("item").length() != 0)
+						{
+							item = data.getStringExtra("item");
+							duration = data.getIntExtra("duration", 0);
+							durationText.setText(duration + " 개월");
+							Log.i(TAG, "항목 " + item + " " + duration);
+							categoryName.setText(data.getStringExtra("item"));
+							category = data.getIntExtra("category", NEGATIVE);
+							//db items 에 추가
+							if(category == CATEGORY_SAVEM || category == CATEGORY_SAVEP)
+							{
+								dbManager.insertToItems(data.getStringExtra("item"), CATEGORY_SAVE);
+								//dbManager.insert(CATEGORY_SAVE, data.getStringExtra("item"));
+							}
+							else
+							{
+								dbManager.insertToItems(data.getStringExtra("item"), category);
+								//dbManager.insert(category, data.getStringExtra("item"));
+							}
+							dbManager.show_items_table();
+							//라디오버튼 체크
+							if(category == CATEGORY_SPEND)
+							{
+								RadioButton radioButton = findViewById(R.id.spend_radio_button);
+								radioButton.setChecked(true);
+							}
+							else if(category == CATEGORY_EARN)
+							{
+								RadioButton radioButton = findViewById(R.id.earn_radio_button);
+								radioButton.setChecked(true);
+							}
+							else if(category == CATEGORY_SAVEP)
+							{
+								RadioButton radioButton = findViewById(R.id.saveP_radio_button);
+								radioButton.setChecked(true);
+							}
+							else if(category == CATEGORY_SAVEM)
+							{
+								RadioButton radioButton = findViewById(R.id.saveM_radio_button);
+								radioButton.setChecked(true);
+							}
+						}
+						else
+						{
+							Log.i(TAG, "돈 안 적음");
+							categoryName.setText("선택하세요");
+						}
+						break;
 				}
-			}
+				break;
+			case CALCULATOR_REQUEST_CODE:
+				Log.i(TAG, "계산기 갔다옴 ");
+				switch(resultCode)
+				{
+					case RESULT_CODE_INSERT:
+						amount = data.getLongExtra("number", 0);
+						String type = data.getStringExtra("type");
+						Log.i(TAG, "계산기 갔다옴 " + amount);
+						if(type.equals(" 원"))
+						{
+							moneyText.setText(amount + type);
+						}
+						else
+						{
+							durationText.setText(amount + type);
+							duration = amount;
+						}
+						break;
+					case RESULT_CODE_CANCEL:
+						Log.i(TAG, "계산기 갔다옴 취소 눌림");
+						break;
+				}
+				break;
 		}
 	}
 
@@ -284,57 +409,6 @@ public class InputActivity extends AppCompatActivity
 		else
 		{
 			return "토";
-		}
-	}
-
-	public void onRadioClicked(View v)
-	{
-		switch(v.getId())
-		{
-			case R.id.spend_radio_button:
-				Log.i(TAG, "지출");
-				category = CATEGORY_SPEND;
-				break;
-			case R.id.earn_radio_button:
-				Log.i(TAG, "수입");
-				category = CATEGORY_EARN;
-				break;
-			case R.id.saveP_radio_button:
-				Log.i(TAG, "저금 플러스");
-				category = CATEGORY_SAVEP;
-				break;
-			case R.id.saveM_radio_button:
-				Log.i(TAG, "저금 마이너스");
-				category = CATEGORY_SAVEM;
-				break;
-		}
-	}
-
-	public void onBtnClick(View v) {
-		switch (v.getId()) {
-			case R.id.input_save_btn:
-				intent = new Intent();
-				intent.putExtra("input", "저장");
-				intent.putExtra("category", category);
-				intent.putExtra("year", year);
-				intent.putExtra("month", month);
-				intent.putExtra("day", day);
-				EditText moneyText = findViewById(R.id.input_money_text);
-				amount = Integer.parseInt(moneyText.getText().toString());
-				intent.putExtra("amount", amount);
-				EditText editText = findViewById(R.id.input_explain_text);
-				contents = editText.getText().toString();
-				intent.putExtra("contents", contents);
-				intent.putExtra("minus", minus);
-				setResult(RESULT_CODE_INSERT, intent);
-				finish();
-				break;
-			case R.id.input_cancel_btn:
-				intent = new Intent();
-				intent.putExtra("input", "취소");
-				setResult(RESULT_CODE_CANCEL, intent);
-				finish();
-				break;
 		}
 	}
 

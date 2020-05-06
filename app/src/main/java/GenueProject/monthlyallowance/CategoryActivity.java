@@ -10,6 +10,7 @@ import android.util.SparseBooleanArray;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,8 +23,9 @@ public class CategoryActivity extends Activity
 	static final private int RESULT_CODE_INSERT = 0;
 	static final private int RESULT_CODE_ITEM = 1;
 
-	static final private int CATEGORY_SAVEP = 2;
-	static final private int CATEGORY_SAVEM = 3;
+	static final private int CATEGORY_SAVE = 2;
+	static final private int CATEGORY_SAVEP = 3;
+	static final private int CATEGORY_SAVEM = 4;
 
 	static final private String TABLE_CATEGORY = "Category";
 	static final private String TABLE_ITEMS = "Item";
@@ -39,6 +41,9 @@ public class CategoryActivity extends Activity
 
 	Intent intent;
 
+	int category;
+	int tmp;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -47,12 +52,13 @@ public class CategoryActivity extends Activity
 		setContentView(R.layout.activity_category);
 
 		Intent intent = getIntent();
-		int category = intent.getIntExtra("category", -1);
-		if(category == CATEGORY_SAVEM)
+		tmp = intent.getIntExtra("category", -1);
+		category = tmp;
+		if(tmp == CATEGORY_SAVEM || tmp == CATEGORY_SAVEP)
 		{
-			category = CATEGORY_SAVEP;
+			tmp = CATEGORY_SAVE;
 		}
-		Log.i(TAG, "인텐트 받았엉 " + category);
+		Log.i(TAG, "인텐트 받았엉 " + tmp);
 		setRecyclerview();
 
 		//db에서 필요한 테이블 받아와
@@ -60,7 +66,7 @@ public class CategoryActivity extends Activity
 		String sql = 	"SELECT DISTINCT * " +
 						"FROM " + TABLE_CATEGORY + ", " + TABLE_ITEMS + " " +
 						"WHERE "+ TABLE_CATEGORY + ".c_id=" + TABLE_ITEMS + ".c_id" + " " +
-						"AND " + TABLE_CATEGORY + ".c_id=" + category;
+						"AND " + TABLE_CATEGORY + ".c_id=" + tmp;
 		Cursor c = dbManager.rawQuery(sql, null);
 		Log.i(TAG, " 행 : " + c.getCount() + " 열 : " + c.getColumnCount());
 		while(c.moveToNext())
@@ -89,9 +95,10 @@ public class CategoryActivity extends Activity
 				//액티비티 꺼
 				view.setBackgroundColor(Color.BLUE);
 				String name = list.get(position).getName();
-				Log.i(TAG, "선택했어 : " + list.get(position).getName());
+				Log.i(TAG, "선택했어 : " + name);
 				Intent toPut = new Intent();
 				toPut.putExtra("result", name);
+				toPut.putExtra("category", category);
 				setResult(RESULT_CODE_ITEM, toPut);
 				finish();
 			}
@@ -121,15 +128,25 @@ public class CategoryActivity extends Activity
 			case R.id.cancelBtn:
 				intent = new Intent();
 				intent.putExtra("result", "취소");
+				intent.putExtra("category", category);
 				setResult(RESULT_CODE_CANCEL, intent);
+				finish();
 				break;
 			case R.id.insertBtn:
-				intent = new Intent();
-				intent.putExtra("result", "오케이");
-				setResult(RESULT_CODE_INSERT, intent);
+				if(category == CATEGORY_SAVEM)
+				{
+					Toast.makeText(this, "\"저축 -\" 일 때는 항목 추가가 안됩니다", Toast.LENGTH_SHORT).show();
+				}
+				else
+				{
+					intent = new Intent();
+					intent.putExtra("result", "오케이");
+					intent.putExtra("category", category);
+					setResult(RESULT_CODE_INSERT, intent);
+					finish();
+				}
 				break;
 		}
-		finish();
 	}
 
 	//창 밖에 클릭 시 안닫혀
@@ -148,6 +165,7 @@ public class CategoryActivity extends Activity
 	{
 		intent = new Intent();
 		intent.putExtra("result", "취소");
+		intent.putExtra("cateogory", category);
 		setResult(RESULT_CODE_CANCEL, intent);
 		finish();
 	}
