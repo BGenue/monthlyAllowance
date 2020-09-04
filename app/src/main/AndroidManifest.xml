@@ -23,6 +23,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".InputActivity"/>
+        <activity android:name=".CategoryActivity" android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar"/><!-- @style/Theme.AppCompat.DayNight.Dialog -->
+        <activity android:name=".InsertActivity" android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar"/>
+        <activity android:name=".CalendarActivity"/>
+        <activity android:name=".HistoryActivity"/>
+        <activity android:name=".MonthlyInfoActivity" android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar"/>
+        <activity android:name=".myCalculator" android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar"/>
     </application>
 
 </manifest>

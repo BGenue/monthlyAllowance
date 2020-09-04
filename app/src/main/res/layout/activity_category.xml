@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="300dp"
+    android:layout_height="500dp"
+    tools:context=".CategoryActivity">
+    <TextView
+        android:id="@+id/category_title"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="카테고리"
+        android:autoSizeTextType="uniform"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/category_list"
+        app:layout_constraintHeight_default="percent"
+        app:layout_constraintHeight_percent="0.1"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/category_list"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scrollbars="vertical"
+        android:text="카테고리"
+        app:layout_constraintTop_toBottomOf="@+id/category_title"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/insertBtn">
+    </androidx.recyclerview.widget.RecyclerView>
+    <Button
+        android:id="@+id/insertBtn"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="추가"
+        android:onClick="categoryOnClick"
+        app:layout_constraintTop_toBottomOf="@+id/category_list"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/cancelBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHeight_default="percent"
+        app:layout_constraintHeight_percent="0.2"/>
+    <Button
+        android:id="@+id/cancelBtn"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="취소"
+        android:onClick="categoryOnClick"
+        app:layout_constraintTop_toTopOf="@+id/insertBtn"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/insertBtn"
+        app:layout_constraintBottom_toBottomOf="@+id/insertBtn"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
